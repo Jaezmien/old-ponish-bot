@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.vscode/
+prisma/*.db
+prisma/migrations/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
