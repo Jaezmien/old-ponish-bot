@@ -32,15 +32,15 @@ model Word {
 
 model WordSpeech {
     id        Int          @id @default(autoincrement())
-    word      Word         @relation(fields: [word_id], references: [word])
+    word      Word         @relation(fields: [word_id], references: [word], onDelete: Cascade)
     word_id   String
-    speech    PartOfSpeech @relation(fields: [speech_id], references: [id])
+    speech    PartOfSpeech @relation(fields: [speech_id], references: [id], onDelete: Cascade)
     speech_id Int
 }
 
 model WordNSFW {
     word_id                 String  @id
-    word                    Word    @relation(fields: [word_id], references: [word])
+    word                    Word    @relation(fields: [word_id], references: [word], onDelete: Cascade)
     out_of_universe_context String?
     in_universe_context     String?
     nsfw_description        String? // NSFW words can have alternate descriptions.
@@ -48,14 +48,14 @@ model WordNSFW {
 
 model WordCharacter {
     word_id                 String  @id
-    word                    Word    @relation(fields: [word_id], references: [word])
+    word                    Word    @relation(fields: [word_id], references: [word], onDelete: Cascade)
     character               String
     character_justification String?
 }
 
 model WordRelation {
     id      String @default(cuid())
-    word    Word   @relation(fields: [word_id], references: [word])
+    word    Word   @relation(fields: [word_id], references: [word], onDelete: Cascade)
     word_id String @unique
 }
 
