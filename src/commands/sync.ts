@@ -1,6 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
-import { Dictionary, Etymology } from '../lib/dictionary';
+import { Dictionary, DictionaryCache, Etymology } from '../lib/dictionary';
 import { PermissionFlagsBits } from 'discord.js';
 
 @ApplyOptions<Command.Options>({
@@ -10,12 +10,8 @@ import { PermissionFlagsBits } from 'discord.js';
 })
 export class DatabaseSyncCommand extends Command {
 	public override registerApplicationCommands(registry: Command.Registry) {
-		registry.registerChatInputCommand(
-			(builder) =>
-				builder
-					.setName(this.name)
-					.setDescription(this.description)
-					.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+		registry.registerChatInputCommand((builder) =>
+			builder.setName(this.name).setDescription(this.description).setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
 		);
 	}
 
@@ -26,6 +22,7 @@ export class DatabaseSyncCommand extends Command {
 			content: '🌟 The database sync is in progress!'
 		});
 
+		DictionaryCache.flushAll();
 		await Dictionary.reload(false);
 		await Etymology.reload(false);
 
