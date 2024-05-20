@@ -3,6 +3,7 @@ import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework
 import { type ModalSubmitInteraction } from 'discord.js';
 import { Prisma } from '../lib/constants';
 import { create_wotd_from_word } from '../lib/utils';
+import { Dictionary } from '../lib/dictionary';
 
 @ApplyOptions<InteractionHandler.Options>({
 	name: 'wotd_fix',
@@ -27,18 +28,7 @@ export class WOTDFixHandler extends InteractionHandler {
 			return;
 		}
 
-		const db_word = await Prisma.word.findFirst({
-			where: { word: wotd_post.word },
-			include: {
-				part_of_speech: {
-					include: {
-						speech: true
-					}
-				},
-				character: true,
-				nsfw: true
-			}
-		});
+		const db_word = await Dictionary.getEntry(wotd_post.word);
 
 		if (!db_word) {
 			await interaction.editReply({
@@ -56,7 +46,7 @@ export class WOTDFixHandler extends InteractionHandler {
 		}
 
 		const old_message = await channel.messages.fetch(id);
-		const embed = create_wotd_from_word(db_word, interaction.user);
+		const embed = create_wotd_from_word(wotd_post.word, db_word, interaction.user);
 
 		old_message.edit({
 			content: `## **[ 📰 Word Of The Day! 📰 ]**\n${message}\n\n📢 <@&581679273010790403>`,

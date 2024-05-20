@@ -3,6 +3,7 @@ import { GatewayIntentBits, Partials } from 'discord.js';
 import { Prisma } from './lib/constants';
 import './lib/setup';
 import { display_suggestion_category, hide_suggestion_category } from './lib/utils';
+import { Dictionary, Etymology } from './lib/dictionary';
 
 const client = new SapphireClient({
 	defaultPrefix: '!',
@@ -32,8 +33,7 @@ async function stop_bot(signal?: number | string) {
 	} catch (err) {
 		client.logger.error('💥 An error has occured while trying to exit!');
 		client.logger.error(err);
-	}
-	finally {
+	} finally {
 		process.kill(process.pid, signal);
 	}
 }
@@ -52,6 +52,10 @@ const main = async () => {
 
 			await stop_bot(1);
 		});
+
+		client.logger.info('🔄 Loading database...');
+		await Dictionary.reload(true);
+		await Etymology.reload(true);
 
 		// -- //
 

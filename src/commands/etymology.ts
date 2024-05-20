@@ -1,7 +1,7 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
-import { Prisma } from '../lib/constants';
 import { create_could_not_find_string, create_embed_from_etymology, find_closest_from_array } from '../lib/utils';
+import { Etymology } from '../lib/dictionary';
 
 @ApplyOptions<Command.Options>({
 	name: 'etymology',
@@ -20,29 +20,22 @@ export class DictionaryEtymologyCommand extends Command {
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
 		await interaction.deferReply({ ephemeral: false });
 
-		const search_word = interaction.options.getString('word', true);
+		const word = interaction.options.getString('word', true);
+		const entry = await Etymology.getEntry(word);
 
-		const word = await Prisma.etymology.findFirst({
-			where: { word: search_word }
-		});
-
-		if (word === null) {
-			const db_words = (
-				await Prisma.etymology.findMany({
-					select: { word: true }
-				})
-			).map((w) => w.word);
-			const closest_words = find_closest_from_array(search_word, db_words).splice(0, 5);
+		if (!entry) {
+			const db_words = Etymology.getWords();
+			const closest_words = find_closest_from_array(word, db_words).splice(0, 5);
 
 			return await interaction.editReply({
 				content: create_could_not_find_string(
-					`<:panic:570675430328107018> Sorry, I couldn't find \`${search_word}\` in the etymology list!`,
+					`<:panic:570675430328107018> Sorry, I couldn't find \`${word}\` in the etymology list!`,
 					closest_words
 				)
 			});
 		}
 
-		let embed = create_embed_from_etymology(word);
+		let embed = create_embed_from_etymology(word, entry);
 
 		return await interaction.editReply({
 			content: `📚 *Found it*!`,

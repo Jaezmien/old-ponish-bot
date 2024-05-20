@@ -1,7 +1,7 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
-import { Prisma } from '../lib/constants';
 import { create_embed_from_word } from '../lib/utils';
+import { Dictionary } from '../lib/dictionary';
 
 @ApplyOptions<Command.Options>({
 	name: 'random',
@@ -15,20 +15,12 @@ export class RandomWordCommand extends Command {
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
 		await interaction.deferReply({ ephemeral: false });
 
-		const words_count = await Prisma.word.count();
-		const word = await Prisma.word.findFirst({
-			skip: Math.floor(Math.random() * (words_count + 1)),
-			include: {
-				nsfw: true,
-				part_of_speech: {
-					include: {
-						speech: true
-					}
-				}
-			}
-		});
+		const words = Dictionary.getWords();
+		const index = Math.floor(Math.random() * (words.length + 1));
+		const word = words[index];
+		const entry = await Dictionary.getEntry(word);
 
-		if (!word) {
+		if (!entry) {
 			await interaction.editReply({
 				content: '<:panic:570675430328107018> An error has occured while trying to get a random word!'
 			});
@@ -36,7 +28,7 @@ export class RandomWordCommand extends Command {
 			return;
 		}
 
-		let embed = create_embed_from_word(word);
+		let embed = create_embed_from_word(word, entry);
 
 		interaction.editReply({
 			content: `📚 *Here's a word*!`,
