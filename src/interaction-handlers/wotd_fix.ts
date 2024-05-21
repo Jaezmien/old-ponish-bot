@@ -1,8 +1,9 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import { type ModalSubmitInteraction } from 'discord.js';
-import { Prisma } from '../lib/constants';
 import { create_wotd_from_word } from '../lib/utils';
+import { Dictionary } from '../lib/dictionary';
+import { WOTDManager } from '../lib/wotdManager';
 
 @ApplyOptions<InteractionHandler.Options>({
 	name: 'wotd_fix',
@@ -15,9 +16,7 @@ export class WOTDFixHandler extends InteractionHandler {
 		const id = interaction.fields.getTextInputValue('wotd_id');
 		const message = interaction.fields.getTextInputValue('wotd_message');
 
-		const wotd_post = await Prisma.wordOfTheDay.findFirst({
-			where: { id: id }
-		});
+		const wotd_post = await WOTDManager.findByMessageID(id);
 
 		if (!wotd_post) {
 			await interaction.editReply({
@@ -27,18 +26,7 @@ export class WOTDFixHandler extends InteractionHandler {
 			return;
 		}
 
-		const db_word = await Prisma.word.findFirst({
-			where: { word: wotd_post.word },
-			include: {
-				part_of_speech: {
-					include: {
-						speech: true
-					}
-				},
-				character: true,
-				nsfw: true
-			}
-		});
+		const db_word = await Dictionary.getEntry(wotd_post.word);
 
 		if (!db_word) {
 			await interaction.editReply({
@@ -56,16 +44,18 @@ export class WOTDFixHandler extends InteractionHandler {
 		}
 
 		const old_message = await channel.messages.fetch(id);
-		const embed = create_wotd_from_word(db_word, interaction.user);
+		const embed = create_wotd_from_word(wotd_post.word, db_word, interaction.user);
 
 		old_message.edit({
 			content: `## **[ 📰 Word Of The Day! 📰 ]**\n${message}\n\n📢 <@&581679273010790403>`,
 			embeds: [embed]
 		});
 
-		await Prisma.wordOfTheDay.update({
-			where: { id: id },
-			data: { message: message }
+		await WOTDManager.update(id, {
+			message_id: id,
+			author: wotd_post.author,
+			word: wotd_post.word,
+			message
 		});
 
 		await interaction.editReply({

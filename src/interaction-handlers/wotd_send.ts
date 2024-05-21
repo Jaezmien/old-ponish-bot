@@ -1,8 +1,9 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import { type ModalSubmitInteraction } from 'discord.js';
-import { Prisma } from '../lib/constants';
 import { create_wotd_from_word } from '../lib/utils';
+import { Dictionary } from '../lib/dictionary';
+import { WOTDManager } from '../lib/wotdManager';
 
 @ApplyOptions<InteractionHandler.Options>({
 	name: 'wotd_send',
@@ -15,18 +16,7 @@ export class WOTDSendHandler extends InteractionHandler {
 		const word = interaction.fields.getTextInputValue('wotd_word');
 		const message = interaction.fields.getTextInputValue('wotd_message');
 
-		const db_word = await Prisma.word.findFirst({
-			where: { word: word },
-			include: {
-				part_of_speech: {
-					include: {
-						speech: true
-					}
-				},
-				character: true,
-				nsfw: true
-			}
-		});
+		const db_word = await Dictionary.getEntry(word);
 
 		if (!db_word) {
 			await interaction.editReply({
@@ -43,20 +33,18 @@ export class WOTDSendHandler extends InteractionHandler {
 			return;
 		}
 
-		let embed = create_wotd_from_word(db_word, interaction.user);
+		let embed = create_wotd_from_word(word, db_word, interaction.user);
 
 		const wotd_message = await channel.send({
 			content: `## **[ 📰 Word Of The Day! 📰 ]**\n${message}\n\n📢 <@&581679273010790403>`,
 			embeds: [embed]
 		});
 
-		await Prisma.wordOfTheDay.create({
-			data: {
-				id: wotd_message.id,
-				author: interaction.user.id,
-				message: message,
-				word: word
-			}
+		await WOTDManager.create({
+			message_id: wotd_message.id,
+			author: interaction.user.id,
+			message: message,
+			word: word
 		});
 
 		await interaction.editReply({

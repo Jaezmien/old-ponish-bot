@@ -1,7 +1,7 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
-import { Prisma } from '../lib/constants';
 import { find_closest_from_array } from '../lib/utils';
+import { Dictionary } from '../lib/dictionary';
 
 @ApplyOptions<Command.Options>({
 	name: 'search',
@@ -22,17 +22,9 @@ export class SearchWordCommand extends Command {
 
 		const query = interaction.options.getString('query', true);
 
-		const db_words = await Prisma.word.findMany({
-			select: {
-				word: true,
-				description: true
-			}
-		});
+		const db_words = Dictionary.getWords();
 
-		const leven_closest = find_closest_from_array(
-			query,
-			db_words.map((w) => w.word)
-		);
+		const leven_closest = find_closest_from_array(query, db_words);
 
 		if (leven_closest.length === 0) {
 			await interaction.editReply({
@@ -46,7 +38,14 @@ export class SearchWordCommand extends Command {
 
 		let result = '📚 Here is your search result!\n' + '```diff\n';
 
-		result += leven_closest.map((w) => `+ ${w}\n---> ${db_words.find((x) => x.word === w)?.description}`).join('\n\n');
+		const leven_result = await Promise.all(
+			leven_closest.slice(0, MAXIMUM_AMOUNT).map(async (w) => {
+				const entry = (await Dictionary.getEntry(w))!;
+				return `+ ${w}\n---> ${entry.definition}`;
+			})
+		);
+		result += leven_result.join('\n\n');
+
 		if (leven_closest.length - MAXIMUM_AMOUNT > 0) {
 			result += `\n\n- ... Omitted ${leven_closest.length - MAXIMUM_AMOUNT} words ...`;
 		}

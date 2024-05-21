@@ -1,4 +1,3 @@
-import { Prisma as PrismaClient } from '@prisma/client';
 import {
 	SapphireClient,
 	container,
@@ -11,6 +10,7 @@ import { cyan } from 'colorette';
 import { ChannelType, EmbedBuilder, type APIUser, type Guild, type User } from 'discord.js';
 import { distance } from 'fastest-levenshtein';
 import { capitalize } from 'lodash';
+import { DictionaryEntry, EtymologyEntry } from './dictionary';
 
 export function logSuccessCommand(payload: ContextMenuCommandSuccessPayload | ChatInputCommandSuccessPayload | MessageCommandSuccessPayload): void {
 	let successLoggerData: ReturnType<typeof getSuccessLoggerData>;
@@ -52,18 +52,15 @@ function getGuildInfo(guild: Guild | null) {
 
 // -- //
 
-type EmbeddableWord = PrismaClient.WordGetPayload<{
-	include: { nsfw: true; part_of_speech: { include: { speech: true } } };
-}>;
-export function create_embed_from_word(word: EmbeddableWord) {
+export function create_embed_from_word(word: string, entry: DictionaryEntry) {
 	let embed = new EmbedBuilder()
-		.setTitle(`🔖 ${word.word}`)
-		.setDescription(word.description)
+		.setTitle(`🔖 ${word}`)
+		.setDescription(entry.definition)
 		.addFields({
 			name: '📎 Parts of Speech',
-			value: word.part_of_speech.map((p) => capitalize(p.speech.type_of_speech)).join(', ')
+			value: entry.speech.map((p) => capitalize(p)).join(', ')
 		});
-	if (word.nsfw) {
+	if (!!entry.nsfw) {
 		embed.addFields({
 			name: '<:lewd:666458724625416255> Notice',
 			value: 'This word may be **Not Safe For Work**!'
@@ -72,77 +69,65 @@ export function create_embed_from_word(word: EmbeddableWord) {
 
 	return embed;
 }
-type EmbeddableEtymology = PrismaClient.EtymologyGetPayload<{}>;
-export function create_embed_from_etymology(etymology: EmbeddableEtymology) {
-	let embed = new EmbedBuilder().setTitle(`🔖 ${etymology.word}`);
+export function create_embed_from_etymology(word: string, entry: EtymologyEntry) {
+	let embed = new EmbedBuilder().setTitle(`🔖 ${word}`);
 
-	if (etymology.credit) embed = embed.setFooter({ text: `Found by ${etymology.credit}` });
-	if (etymology.description) embed = embed.setDescription(etymology.description);
-	if (etymology.etymology) embed = embed.addFields({ name: '📌 Etymology', value: etymology.etymology });
-	if (etymology.parts_of_speech) embed = embed.addFields({ name: '📎 Parts of Speech', value: etymology.parts_of_speech });
-	if (etymology.note) embed = embed.addFields({ name: '📝 Note', value: etymology.note });
+	if (entry.credit) embed = embed.setFooter({ text: `Found by ${entry.credit}` });
+	if (entry.description) embed = embed.setDescription(entry.description);
+	if (entry.etymology) embed = embed.addFields({ name: '📌 Etymology', value: entry.etymology });
+	if (entry.speech) embed = embed.addFields({ name: '📎 Parts of Speech', value: entry.speech.join(', ') });
+	if (entry.note) embed = embed.addFields({ name: '📝 Note', value: entry.note });
 
 	return embed;
 }
 
-type WOTDWord = PrismaClient.WordGetPayload<{
-	include: {
-		part_of_speech: {
-			include: {
-				speech: true;
-			};
-		};
-		character: true;
-		nsfw: true;
-	};
-}>;
-export function create_wotd_from_word(word: WOTDWord, user: User) {
+export function create_wotd_from_word(word: string, entry: DictionaryEntry, user: User) {
 	let embed = new EmbedBuilder()
 
-		.setTitle(`🔖  ${word.word}  🔖`)
-		.setDescription(word.description)
+		.setTitle(`🔖  ${word}  🔖`)
+		.setDescription(entry.definition)
 		.setFooter({
 			text: `✉ This was posted by ${user.username}`,
 			iconURL: user.displayAvatarURL()
 		})
 		.addFields({
 			name: '📎 Parts of Speech',
-			value: word.part_of_speech.map((p) => capitalize(p.speech.type_of_speech)).join(', '),
+			value: entry.speech.map((p) => capitalize(p)).join(', '),
 			inline: true
 		})
 		.setColor(7819180);
 
-	if (word.nsfw) {
+	if (entry.nsfw) {
 		embed = embed.addFields({
 			name: '⚠️ This word is Not Safe For Work <:lewd:666458724625416255>',
 			value: '\u200B'
 		});
-		if (word.nsfw.out_of_universe_context)
+		if (entry.nsfw.out_universe)
 			embed = embed.addFields({
 				name: 'Out Of Universe Context',
-				value: word.nsfw.out_of_universe_context,
+				value: entry.nsfw.out_universe,
 				inline: true
 			});
-		if (word.nsfw.in_universe_context)
+		if (entry.nsfw.in_universe)
 			embed = embed.addFields({
 				name: 'In Universe Context',
-				value: word.nsfw.in_universe_context,
+				value: entry.nsfw.in_universe,
 				inline: true
 			});
 	}
 
-	if (word.character) {
-		embed = embed.addFields({ name: 'Character', value: word.character.character });
-		if (word.character.character_justification) {
+	if (entry.character) {
+		embed = embed.addFields({ name: 'Character', value: entry.character.english! });
+		if (entry.character.justification) {
 			embed = embed.addFields({
 				name: 'Character Justification',
-				value: word.character.character_justification
+				value: entry.character.justification
 			});
 		}
 	}
 
-	if (word.note) {
-		embed = embed.addFields({ name: '📝 Note', value: word.note });
+	if (entry.note) {
+		embed = embed.addFields({ name: '📝 Note', value: entry.note });
 	}
 
 	return embed;
