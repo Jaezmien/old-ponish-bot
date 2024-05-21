@@ -74,7 +74,7 @@ export class UserCommand extends Subcommand {
 	public async wotdFix(interaction: Subcommand.ChatInputCommandInteraction) {
 		const messageID = interaction.options.getString('message', true);
 
-		const wotd_post = await WOTDManager.findByMessageID( messageID );
+		const wotd_post = await WOTDManager.findByMessageID(messageID);
 
 		if (!wotd_post) {
 			await interaction.editReply({

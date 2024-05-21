@@ -16,7 +16,7 @@ export class WOTDFixHandler extends InteractionHandler {
 		const id = interaction.fields.getTextInputValue('wotd_id');
 		const message = interaction.fields.getTextInputValue('wotd_message');
 
-		const wotd_post = await WOTDManager.find(id);
+		const wotd_post = await WOTDManager.findByMessageID(id);
 
 		if (!wotd_post) {
 			await interaction.editReply({
@@ -52,11 +52,11 @@ export class WOTDFixHandler extends InteractionHandler {
 		});
 
 		await WOTDManager.update(id, {
-			id,
+			message_id: id,
 			author: wotd_post.author,
 			word: wotd_post.word,
 			message
-		})
+		});
 
 		await interaction.editReply({
 			content: '<:hoof:572187847629733922> Your post has been edited!'
