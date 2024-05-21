@@ -67,7 +67,7 @@ class Dictionary {
 	private __words: Set<string>;
 
 	constructor() {
-		this.__filedb = new FileDBManager('https://github.com/Jaezmien/old-ponish-db/releases/latest/download/dictionary.json', 'dictionary.json');
+		this.__filedb = new FileDBManager('https://github.com/Jaezmien/old-ponish-db/releases/download/Nightly/dictionary.json', 'dictionary.json');
 
 		this.__words = new Set();
 	}
@@ -116,7 +116,7 @@ class Etymology {
 	private __words: Set<string>;
 
 	constructor() {
-		this.__filedb = new FileDBManager('https://github.com/Jaezmien/old-ponish-db/releases/latest/download/etymology.json', 'etymology.json');
+		this.__filedb = new FileDBManager('https://github.com/Jaezmien/old-ponish-db/releases/download/Nightly/etymology.json', 'etymology.json');
 
 		this.__words = new Set();
 	}
