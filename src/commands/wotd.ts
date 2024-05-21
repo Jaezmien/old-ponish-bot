@@ -2,7 +2,7 @@ import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
 import { Subcommand } from '@sapphire/plugin-subcommands';
 import { ActionRowBuilder, ModalBuilder, PermissionFlagsBits, TextInputBuilder, TextInputStyle } from 'discord.js';
-import { Prisma } from '../lib/constants';
+import { WOTDManager } from '../lib/wotdManager';
 
 @ApplyOptions<Subcommand.Options>({
 	name: 'wotd'
@@ -74,9 +74,7 @@ export class UserCommand extends Subcommand {
 	public async wotdFix(interaction: Subcommand.ChatInputCommandInteraction) {
 		const messageID = interaction.options.getString('message', true);
 
-		const wotd_post = await Prisma.wordOfTheDay.findFirst({
-			where: { id: messageID }
-		});
+		const wotd_post = await WOTDManager.findByMessageID( messageID );
 
 		if (!wotd_post) {
 			await interaction.editReply({

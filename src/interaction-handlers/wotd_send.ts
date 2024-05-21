@@ -1,9 +1,9 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import { type ModalSubmitInteraction } from 'discord.js';
-import { Prisma } from '../lib/constants';
 import { create_wotd_from_word } from '../lib/utils';
 import { Dictionary } from '../lib/dictionary';
+import { WOTDManager } from '../lib/wotdManager';
 
 @ApplyOptions<InteractionHandler.Options>({
 	name: 'wotd_send',
@@ -40,14 +40,12 @@ export class WOTDSendHandler extends InteractionHandler {
 			embeds: [embed]
 		});
 
-		await Prisma.wordOfTheDay.create({
-			data: {
-				id: wotd_message.id,
-				author: interaction.user.id,
-				message: message,
-				word: word
-			}
-		});
+		await WOTDManager.create({
+			message_id: wotd_message.id,
+			author: interaction.user.id,
+			message: message,
+			word: word
+		})
 
 		await interaction.editReply({
 			content: '<:hoof:572187847629733922> Your post has been created!'

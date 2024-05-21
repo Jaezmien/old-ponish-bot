@@ -1,9 +1,9 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import { type ModalSubmitInteraction } from 'discord.js';
-import { Prisma } from '../lib/constants';
 import { create_wotd_from_word } from '../lib/utils';
 import { Dictionary } from '../lib/dictionary';
+import { WOTDManager } from '../lib/wotdManager';
 
 @ApplyOptions<InteractionHandler.Options>({
 	name: 'wotd_fix',
@@ -16,9 +16,7 @@ export class WOTDFixHandler extends InteractionHandler {
 		const id = interaction.fields.getTextInputValue('wotd_id');
 		const message = interaction.fields.getTextInputValue('wotd_message');
 
-		const wotd_post = await Prisma.wordOfTheDay.findFirst({
-			where: { id: id }
-		});
+		const wotd_post = await WOTDManager.find(id);
 
 		if (!wotd_post) {
 			await interaction.editReply({
@@ -53,10 +51,12 @@ export class WOTDFixHandler extends InteractionHandler {
 			embeds: [embed]
 		});
 
-		await Prisma.wordOfTheDay.update({
-			where: { id: id },
-			data: { message: message }
-		});
+		await WOTDManager.update(id, {
+			id,
+			author: wotd_post.author,
+			word: wotd_post.word,
+			message
+		})
 
 		await interaction.editReply({
 			content: '<:hoof:572187847629733922> Your post has been edited!'
