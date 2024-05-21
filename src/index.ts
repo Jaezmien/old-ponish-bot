@@ -1,6 +1,5 @@
 import { LogLevel, SapphireClient } from '@sapphire/framework';
 import { GatewayIntentBits, Partials } from 'discord.js';
-import { Prisma } from './lib/constants';
 import './lib/setup';
 import { display_suggestion_category, hide_suggestion_category } from './lib/utils';
 import { Dictionary, Etymology } from './lib/dictionary';
@@ -16,18 +15,12 @@ const client = new SapphireClient({
 	loadMessageCommandListeners: true
 });
 
-let database_open = true;
 async function stop_bot(signal?: number | string) {
 	try {
 		if (process.env.NODE_ENV === 'production') await hide_suggestion_category(client, '940438939632795650');
 
 		client.user?.setStatus('invisible');
 		client.destroy();
-
-		if (database_open) {
-			database_open = false;
-			await Prisma.$disconnect();
-		}
 
 		client.logger.info('👋 Goodbye!');
 	} catch (err) {
