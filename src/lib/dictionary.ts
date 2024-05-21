@@ -73,7 +73,7 @@ class Dictionary {
 	}
 
 	async reload(ignoreIfExists = false) {
-		this.__filedb.reload(ignoreIfExists);
+		await this.__filedb.reload(ignoreIfExists);
 		await this.load();
 	}
 
@@ -122,7 +122,7 @@ class Etymology {
 	}
 
 	async reload(ignoreIfExists = false) {
-		this.__filedb.reload(ignoreIfExists);
+		await this.__filedb.reload(ignoreIfExists);
 		await this.load();
 	}
 
