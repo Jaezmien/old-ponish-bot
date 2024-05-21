@@ -19,7 +19,7 @@ export class DatabaseSyncCommand extends Command {
 		await interaction.deferReply();
 
 		await interaction.editReply({
-			content: '🌟 The database sync is in progress!'
+			content: '🔄 The database sync is in progress!'
 		});
 
 		DictionaryCache.flushAll();
@@ -27,7 +27,7 @@ export class DatabaseSyncCommand extends Command {
 		await Etymology.reload(false);
 
 		await interaction.editReply({
-			content: '✅ Database has been fully synced!'
+			content: '<:hoof:572187847629733922> Database has been fully synced!'
 		});
 	}
 }
