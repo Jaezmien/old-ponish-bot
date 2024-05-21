@@ -45,7 +45,7 @@ export class WOTDSendHandler extends InteractionHandler {
 			author: interaction.user.id,
 			message: message,
 			word: word
-		})
+		});
 
 		await interaction.editReply({
 			content: '<:hoof:572187847629733922> Your post has been created!'
