@@ -9,7 +9,7 @@ import {
 import { cyan } from 'colorette';
 import { ChannelType, EmbedBuilder, type APIUser, type Guild, type User } from 'discord.js';
 import { distance } from 'fastest-levenshtein';
-import { capitalize } from 'lodash';
+import capitalize from 'lodash.capitalize';
 import { DictionaryEntry, EtymologyEntry } from './dictionary';
 
 export function logSuccessCommand(payload: ContextMenuCommandSuccessPayload | ChatInputCommandSuccessPayload | MessageCommandSuccessPayload): void {

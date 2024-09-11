@@ -20,14 +20,14 @@
 		"colorette": "^2.0.20",
 		"discord.js": "^14.11.0",
 		"fastest-levenshtein": "^1.0.16",
-		"lodash": "^4.17.21",
+		"lodash.capitalize": "^4.2.1",
 		"node-cache": "^5.1.2"
 	},
 	"devDependencies": {
 		"@sapphire/cli": "^1.6.1",
 		"@sapphire/prettier-config": "^1.4.5",
 		"@sapphire/ts-config": "^5.0.0",
-		"@types/lodash": "^4.14.195",
+		"@types/lodash.capitalize": "^4.2.9",
 		"@types/node": "^18.16.18",
 		"@types/ws": "^8.5.5",
 		"cross-env": "^7.0.3",
