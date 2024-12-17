@@ -7,7 +7,7 @@ import {
 	type MessageCommandSuccessPayload
 } from '@sapphire/framework';
 import { cyan } from 'colorette';
-import { ChannelType, EmbedBuilder, type APIUser, type Guild, type User } from 'discord.js';
+import { ChannelType, EmbedBuilder, OverwriteType, type APIUser, type Guild, type User } from 'discord.js';
 import { distance } from 'fastest-levenshtein';
 import capitalize from 'lodash.capitalize';
 import { DictionaryEntry, EtymologyEntry } from './dictionary';
@@ -165,18 +165,30 @@ export async function hide_suggestion_category(client: SapphireClient, id: strin
 	if (!channel) return;
 	if (channel.type !== ChannelType.GuildCategory) return;
 
-	await channel.permissionOverwrites.edit('625516772023599135', {
-		SendMessages: false
-	});
+	await channel.permissionOverwrites.edit(
+		'625516772023599135',
+		{
+			SendMessages: false
+		},
+		{
+			type: OverwriteType.Role
+		}
+	);
 }
 export async function display_suggestion_category(client: SapphireClient, id: string) {
 	const channel = await client.channels.fetch(id);
 	if (!channel) return;
 	if (channel.type !== ChannelType.GuildCategory) return;
 
-	await channel.permissionOverwrites.edit('625516772023599135', {
-		SendMessages: true
-	});
+	await channel.permissionOverwrites.edit(
+		'625516772023599135',
+		{
+			SendMessages: true
+		},
+		{
+			type: OverwriteType.Role
+		}
+	);
 }
 
 export function format_time_proper(time: number) {
