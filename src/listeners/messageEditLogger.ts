@@ -44,10 +44,11 @@ export class MessageEditLoggerEvent extends Listener {
 
 		if (process.env.LOG_CHANNEL_ID) {
 			const channel = await newMessage.client.channels.fetch(process.env.LOG_CHANNEL_ID);
-			if (!channel || !channel.isTextBased()) return;
+			if (!channel || !channel.isSendable()) return;
 
 			channel.send({ embeds: [embed] });
 		} else if (process.env.NODE_ENV === 'development') {
+			if (!newMessage.channel.isSendable()) return;
 			await newMessage.channel.send({ embeds: [embed] });
 		}
 	}

@@ -38,10 +38,11 @@ export class MessageDeleteLoggerEvent extends Listener {
 
 		if (process.env.LOG_CHANNEL_ID) {
 			const channel = await message.client.channels.fetch(process.env.LOG_CHANNEL_ID);
-			if (!channel || !channel.isTextBased()) return;
+			if (!channel || !channel.isSendable()) return;
 
 			channel.send({ embeds: [embed] });
 		} else if (process.env.NODE_ENV === 'development') {
+			if (!message.channel.isSendable()) return;
 			await message.channel.send({ embeds: [embed] });
 		}
 	}
