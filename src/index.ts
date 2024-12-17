@@ -65,9 +65,12 @@ const main = async () => {
 				status: 'idle'
 			});
 		}
-		setInterval(() => {
-			set_presence();
-		}, 1000 * 60 * 60); // Reset presence every hour.
+		setInterval(
+			() => {
+				set_presence();
+			},
+			1000 * 60 * 60
+		); // Reset presence every hour.
 		set_presence();
 
 		if (process.env.NODE_ENV === 'production') await display_suggestion_category(client, '940438939632795650');
